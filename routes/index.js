@@ -1,5 +1,6 @@
 const fs = require('fs');
 const express = require('express');
+const crypto = require('crypto');
 
 const routes = express.Router();
 
@@ -19,6 +20,20 @@ routes.get('/talker/:id', (req, res) => {
   if (!talkUser) return res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
 
   res.status(200).json(talkUser);
+});
+
+routes.post('/login', async (req, res) => {
+  try {
+      const { email, password } = req.body;
+
+      if ([email, password].includes(undefined)) {
+          return res.status(401).json({});
+      }
+      const token = crypto.randomBytes(8).toString('hex');
+      return res.status(200).json({ token });    
+  } catch (error) {
+      return res.status(400).end();
+  } 
 });
 
 module.exports = routes;
