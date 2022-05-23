@@ -10,4 +10,15 @@ routes.get('/talker', (req, res) => {
   res.status(200).json(talk);
 });
 
+routes.get('/talker/:id', (req, res) => {
+  const { id } = req.params;
+  const rDados = fs.readFileSync('talker.json');
+  const talk = JSON.parse(rDados);
+
+  const talkUser = talk.find((talker) => talker.id === parseInt(id, 5));
+  if (!talkUser) return res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
+
+  res.status(200).json(talkUser);
+});
+
 module.exports = routes;
