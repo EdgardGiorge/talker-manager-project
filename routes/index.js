@@ -71,11 +71,23 @@ middlewares.checkTalk,
   talker[tUser].name = name;
   talker[tUser].age = age;
   talker[tUser].talk.watchedAt = talk.watchedAt;
-  talker[tUser].talk.rate = talk.rate;
-  // talker.splice(tUser, 1);
+  talker[tUser].talk.rate = talk.rate;  
   const changeTalk = [...talker, talker[tUser]];
   fs.writeFileSync(talkerJson, JSON.stringify(changeTalk));
   return res.status(200).json(changeTalk[tUser]);  
+});
+
+routes.delete('/talker/:id', (req, res) => {
+  const { id } = req.params;
+  const rDados = fs.readFileSync(talkerJson);
+  const talker = JSON.parse(rDados);
+  const tUser = talker.findIndex((index) => index.id === Number(id));
+
+  talker.splice(tUser, 1);
+  
+  const obj = JSON.stringify(talker);
+  fs.writeFileSync(talkerJson, obj);
+  res.status(204).end();
 });
 
 module.exports = routes;
