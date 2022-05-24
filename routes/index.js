@@ -14,6 +14,19 @@ routes.get('/talker', (req, res) => {
   res.status(200).json(talk);
 });
 
+// Ref. Agradecimento aos colegas que me ajudaram a entender que o search era pra utilizar apenas a letra q
+routes.get('/talker/search', middlewares.checkToken, (req, res) => {
+  const { q } = req.query; // usar a propriedade query onde contém os dados, pesquisar se existe pessoas usuárias com o nome da req.
+  const rDados = fs.readFileSync(talkerJson);
+  const talker = JSON.parse(rDados);
+  if (q === undefined || q === '') return res.status(200).json(talker); // Caso não tenha o q pesquisado, retornar status 400 e a msg
+  const users = talker.filter((user) => user.name.toLowerCase().includes(q.toLocaleLowerCase())); // Se existir o q, buscar e filtrar no banco procurar por name
+  
+  if (!users) return res.status(404).json({ message: 'User Not Found' });     
+  
+  res.status(200).json(users);
+});
+
 routes.get('/talker/:id', (req, res) => {
   const { id } = req.params;
   const rDados = fs.readFileSync(talkerJson);
@@ -43,18 +56,17 @@ middlewares.checkRate,
   const rDados = fs.readFileSync(talkerJson);
   const talker = JSON.parse(rDados);
   
-  const obj = {
+  const object = {
     id: talker.length + 1,
     name,
     age,
     talk: { watchedAt, rate },
   };
 
-  const addTalkers = [];
-  addTalkers.push(obj);
-  const objTalk = JSON.stringify(addTalkers);
+  talker.push(object);
+  const objTalk = JSON.stringify(talker);
   fs.writeFileSync(talkerJson, objTalk);
-  return res.status(201).json(obj);
+  return res.status(201).json(object);
 });
 
 routes.put('/talker/:id', 
@@ -82,11 +94,11 @@ routes.delete('/talker/:id', (req, res) => {
   const rDados = fs.readFileSync(talkerJson);
   const talker = JSON.parse(rDados);
   const tUser = talker.findIndex((index) => index.id === Number(id));
+  talker.splice(tUser, 1);  
 
-  talker.splice(tUser, 1);
+  const object = JSON.stringify(talker);
+  fs.writeFileSync(talkerJson, object);
   
-  const obj = JSON.stringify(talker);
-  fs.writeFileSync(talkerJson, obj);
   res.status(204).end();
 });
 
